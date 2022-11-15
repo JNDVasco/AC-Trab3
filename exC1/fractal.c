@@ -7,8 +7,6 @@
 #include <fcntl.h>
 #include <math.h>
 #include <stdio.h>
-#include <string.h>
-
 //  These are the global variables.  That means they can be changed from
 //  any of my functions.  This is usfull for my options function.  That
 //  means that these variables are 'user' variables and can be changed
@@ -28,12 +26,7 @@ float pixcory; // plane for both x and y axis'
 int scrsizex; // Horizontal screen size in pixels
 int scrsizey; // Vertical screen size
 
-int resx;
-int resy;
-int *img;
-
-char path[10] = "./ex2/";
-char filename[64];
+int resx, resy, *img;
 
 void putpixel(int x, int y, int color)
 {
@@ -134,8 +127,7 @@ void Generate(int frac)
 			{
 				mandel(i, j);
 			}
-			printf(filename, sizeof(filename), "%s%d.ppm", path, j);
-			saveimg(img, resx, resy, "julia.pgm");
+
 			i++;
 		} while ((i < scrsizex)); // End horizontal loop
 		j++;
@@ -196,14 +188,14 @@ int main(int argc, char **argv)
 	t1 = clock();
 	Generate(0);
 	t2 = clock();
-	printf("Julia Fractal generated in %6.3f secs.\n", (((double)(t2 - t1)) / CLOCKS_PER_SEC));
+	printf("Mandelbrot Fractal generated in %6.3f secs.\n", (((double)(t2 - t1)) / CLOCKS_PER_SEC));
 	//	mandel(img,resx,resy);
 	// Guarda a imagem no ficheiro
 	saveimg(img, resx, resy, "julia.pgm");
 	t1 = clock();
 	Generate(1);
 	t2 = clock();
-	printf("Mandelbrot Fractal generated in %6.3f secs.\n", (((double)(t2 - t1)) / CLOCKS_PER_SEC));
+	printf("Julia Fractal generated in %6.3f secs.\n", (((double)(t2 - t1)) / CLOCKS_PER_SEC));
 	//	mandel(img,resx,resy);
 	// Guarda a imagem no ficheiro
 	saveimg(img, resx, resy, "mandel.pgm");
