@@ -20,7 +20,7 @@ float Maxx = 2;		// Rightmost Real point of plane to be displayed
 float Minx = -2;	// Leftmost Real point
 float Maxy = 1;		// Uppermost Imaginary point
 float Miny = -1;	// Lowermost Imaginary point
-float initer = 50;	// # of times to repeat function
+float initer = 300; // # of times to repeat function
 
 float pixcorx; // 1 pixel on screen = this many units on the
 float pixcory; // plane for both x and y axis'

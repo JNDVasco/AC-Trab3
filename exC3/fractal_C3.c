@@ -18,13 +18,13 @@
 //  means that these variables are 'user' variables and can be changed
 //  and the changes will be stored for the displaying part of the program
 
-float conx = -0.74; // Real constant, horizontal axis (x)
-float cony = 0.1;	// Imaginary constant, verital axis (y)
-float Maxx = 2;		// Rightmost Real point of plane to be displayed
-float Minx = -2;	// Leftmost Real point
-float Maxy = 1;		// Uppermost Imaginary point
-float Miny = -1;	// Lowermost Imaginary point
-float initer = 50;	// # of times to repeat function
+float conx = -0.74;	 // Real constant, horizontal axis (x)
+float cony = 0.1;	 // Imaginary constant, verital axis (y)
+float Maxx = 2;		 // Rightmost Real point of plane to be displayed
+float Minx = -2;	 // Leftmost Real point
+float Maxy = 1;		 // Uppermost Imaginary point
+float Miny = -1;	 // Lowermost Imaginary point
+float initer = 1000; // # of times to repeat function
 
 float pixcorx; // 1 pixel on screen = this many units on the
 float pixcory; // plane for both x and y axis'
@@ -128,6 +128,9 @@ void Generate(int frac)
 			if (nloops == 0)
 				printf(" Thread %d started with j=%d\n", thread_id, j);
 			++nloops;
+
+			// if (thread_id == 1)
+			// 	printf(" Thread %d is working on j=%d\n", thread_id, j);
 			// Start vertical loop
 
 			for (int i = 0; i < scrsizex; i++)
@@ -202,14 +205,14 @@ int main(int argc, char **argv)
 	t1 = clock();
 	Generate(0);
 	t2 = clock();
-	printf("Julia Fractal generated in %6.3f secs.\n", (((double)(t2 - t1)) / CLOCKS_PER_SEC));
+	printf("Mandelbrot Fractal generated in %6.3f secs.\n", (((double)(t2 - t1)) / CLOCKS_PER_SEC));
 	//	mandel(img,resx,resy);
 	// Guarda a imagem no ficheiro
 	saveimg(img, resx, resy, "julia.pgm");
 	t1 = clock();
 	Generate(1);
 	t2 = clock();
-	printf("Mandelbrot Fractal generated in %6.3f secs.\n", (((double)(t2 - t1)) / CLOCKS_PER_SEC));
+	printf("Julia Fractal generated in %6.3f secs.\n", (((double)(t2 - t1)) / CLOCKS_PER_SEC));
 	//	mandel(img,resx,resy);
 	// Guarda a imagem no ficheiro
 	saveimg(img, resx, resy, "mandel.pgm");

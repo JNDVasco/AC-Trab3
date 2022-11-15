@@ -12,13 +12,13 @@
 //  means that these variables are 'user' variables and can be changed
 //  and the changes will be stored for the displaying part of the program
 
-float conx = -0.74; // Real constant, horizontal axis (x)
-float cony = 0.1;	// Imaginary constant, verital axis (y)
-float Maxx = 2;		// Rightmost Real point of plane to be displayed
-float Minx = -2;	// Leftmost Real point
-float Maxy = 1;		// Uppermost Imaginary point
-float Miny = -1;	// Lowermost Imaginary point
-float initer = 50;	// # of times to repeat function
+float conx = -0.74;	 // Real constant, horizontal axis (x)
+float cony = 0.1;	 // Imaginary constant, verital axis (y)
+float Maxx = 2;		 // Rightmost Real point of plane to be displayed
+float Minx = -2;	 // Leftmost Real point
+float Maxy = 1;		 // Uppermost Imaginary point
+float Miny = -1;	 // Lowermost Imaginary point
+float initer = 1000; // # of times to repeat function
 
 float pixcorx; // 1 pixel on screen = this many units on the
 float pixcory; // plane for both x and y axis'
