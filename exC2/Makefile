@@ -1,6 +1,7 @@
 
 fractal_C2: fractal_C2.c
 	gcc -fopenmp fractal_C2.c -o fractal_C2
+	[ -d ./images ] || mkdir -p ./images
 	./fractal_C2 3840 2160
 	rm -f out_julia.mp4
 	rm -f out_mandel.mp4

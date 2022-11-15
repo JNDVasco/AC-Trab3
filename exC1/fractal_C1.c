@@ -33,8 +33,6 @@ void putpixel(int x, int y, int color)
 	img[y * resx + x] = color * 1111;
 }
 
-struct timespec sum_timestamp(struct timespec begin, struct timespec end);
-
 double time_between_timestamp(struct timespec begin, struct timespec end);
 
 //	***************  JULIA FUNCTION ******************
@@ -115,14 +113,12 @@ void mandel(int xpt, int ypt)
 
 void Generate(int frac)
 {
-
 	int j = 0;
 	do // Start vertical loop
 	{
 		int i = 0;
 		do // Start horizontal loop
 		{
-
 			if (frac)
 			{
 				julia(i, j);
@@ -131,7 +127,6 @@ void Generate(int frac)
 			{
 				mandel(i, j);
 			}
-
 			i++;
 		} while ((i < scrsizex)); // End horizontal loop
 		j++;
@@ -203,28 +198,16 @@ int main(int argc, char **argv)
 	saveimg(img, resx, resy, "julia.pgm");
 }
 
-struct timespec sub_timestamp(struct timespec begin, struct timespec end)
-{
-	struct timespec result;
-
-	result.tv_sec = end.tv_sec - begin.tv_sec;
-	result.tv_nsec = end.tv_nsec - begin.tv_nsec;
-
-	if (result.tv_nsec < 0)
-	{
-		result.tv_sec -= 1;
-		result.tv_nsec += 1e9;
-	}
-
-	return result;
-}
-
-// Returns time in milliseconds
+// Returns time in seconds
 double time_between_timestamp(struct timespec begin, struct timespec end)
 {
 	struct timespec calc;
-	calc = sub_timestamp(begin, end);
-	double result = (calc.tv_sec) + (calc.tv_nsec) / 1e9;
-
-	return result;
+	calc.tv_sec = end.tv_sec - begin.tv_sec;
+	calc.tv_nsec = end.tv_nsec - begin.tv_nsec;
+	if (calc.tv_nsec < 0)
+	{
+		calc.tv_sec -= 1;
+		calc.tv_nsec += 1e9;
+	}
+	return ((calc.tv_sec) + (calc.tv_nsec) / 1e9);
 }

@@ -206,6 +206,7 @@ int main(int argc, char **argv)
 	scrsizey = resy;
 	pixcorx = (Maxx - Minx) / scrsizex;
 	pixcory = (Maxy - Miny) / scrsizey;
+
 	t1 = clock();
 	Generate(0);
 	t2 = clock();
@@ -223,14 +224,8 @@ int main(int argc, char **argv)
 		j++;
 	} while ((j < scrsizey)); // End vertical loop
 
-	//	mandel(img,resx,resy);
-	// Guarda a imagem no ficheiro
-	// saveimg(img, resx, resy, "julia.pgm");
 	t1 = clock();
 	Generate(1);
 	t2 = clock();
 	printf("Julia Fractal generated in %6.3f secs.\n", (((double)(t2 - t1)) / CLOCKS_PER_SEC));
-	//	mandel(img,resx,resy);
-	// Guarda a imagem no ficheiro
-	// saveimg(img, resx, resy, "mandel.pgm");
 }
