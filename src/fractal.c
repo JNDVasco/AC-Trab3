@@ -33,7 +33,8 @@ int resy;
 int *img;
 
 char path[10] = "./ex2/";
-char filename[64];
+char *filename;
+char buffer[20];
 
 void putpixel(int x, int y, int color)
 {
@@ -134,9 +135,13 @@ void Generate(int frac)
 			{
 				mandel(i, j);
 			}
-			concat
-			snprintf(filename, sizeof(filename), "%s%d.ppm", path, j);
-				saveimg(img, resx, resy, "julia.pgm");
+
+			strcpy(filename, path);
+			snprintf(buffer, 20, "fractal-%d-%d.ppm", i, j);
+			strcat(filename, buffer);
+			printf("%s\n", filename);
+			saveimg(img, resx, resy, filename);
+			printf("Hello, Mom!");
 			i++;
 		} while ((i < scrsizex)); // End horizontal loop
 		j++;

@@ -7,6 +7,8 @@
 #include <fcntl.h>
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
+
 //  These are the global variables.  That means they can be changed from
 //  any of my functions.  This is usfull for my options function.  That
 //  means that these variables are 'user' variables and can be changed
@@ -26,7 +28,13 @@ float pixcory; // plane for both x and y axis'
 int scrsizex; // Horizontal screen size in pixels
 int scrsizey; // Vertical screen size
 
-int resx, resy, *img;
+int resx;
+int resy;
+int *img;
+
+char path[10] = "./ex2/";
+char filename[64];
+char buffer[20];
 
 void putpixel(int x, int y, int color)
 {
@@ -47,7 +55,7 @@ void putpixel(int x, int y, int color)
 	constant can be changed by the user.
 */
 
-void julia(int xpt, int ypt)
+void julia(int xpt, int ypt, int maxIter)
 {
 	long double x = xpt * pixcorx + Minx;
 	long double y = Maxy - ypt * pixcory; // converting from pixels to points
@@ -55,9 +63,8 @@ void julia(int xpt, int ypt)
 	long double ynew = 0;
 	int k;
 
-	for (k = 0; k <= initer; k++) // Each pixel loop
+	for (k = 0; k <= maxIter; k++) // Each pixel loop
 	{
-		// The Julia Function Z=Z*Z+c (of complex numbers) into x and y parts
 		xnew = x * x - y * y + conx;
 		ynew = 2 * x * y + cony;
 		x = xnew;
@@ -81,17 +88,16 @@ void julia(int xpt, int ypt)
 	that the Z is 0 and the constant is the point under consideration.
 */
 
-void mandel(int xpt, int ypt)
+void mandel(int xpt, int ypt, int maxIter)
 {
 	long double x = 0;
 	long double y = 0; // converting from pixels to points
 	long double xnew = 0;
 	long double ynew = 0;
-	int k;
+	int k = 0;
 
-	for (k = 0; k <= initer; k++) // Each pixel loop
+	for (k = 0; k <= maxIter; k++) // Each pixel loop
 	{
-		// The Mandelbrot Function Z=Z*Z+c into x and y parts
 		xnew = x * x - y * y + xpt * pixcorx + Minx;
 		ynew = 2 * x * y + Maxy - ypt * pixcory;
 		x = xnew;
@@ -107,31 +113,6 @@ void mandel(int xpt, int ypt)
 		putpixel(xpt, ypt, 0);
 	else
 		putpixel(xpt, ypt, color);
-}
-
-void Generate(int frac)
-{
-
-	int j = 0;
-	do // Start vertical loop
-	{
-		int i = 0;
-		do // Start horizontal loop
-		{
-
-			if (frac)
-			{
-				julia(i, j);
-			}
-			else
-			{
-				mandel(i, j);
-			}
-
-			i++;
-		} while ((i < scrsizex)); // End horizontal loop
-		j++;
-	} while ((j < scrsizey)); // End vertical loop
 }
 
 void saveimg(int *img, int rx, int ry, char *fname)
@@ -156,6 +137,46 @@ void saveimg(int *img, int rx, int ry, char *fname)
 		}
 	}
 	fclose(fp);
+}
+
+void Generate(int frac)
+{
+	for (int maxIter = 0; maxIter <= initer; maxIter++) // Each pixel loop
+	{
+		int j = 0;
+		do // Start vertical loop
+		{
+			int i = 0;
+			do // Start horizontal loop
+			{
+				if (frac)
+				{
+					julia(i, j, maxIter);
+				}
+				else
+				{
+					mandel(i, j, maxIter);
+				}
+				i++;
+			} while ((i < scrsizex)); // End horizontal loop
+			j++;
+		} while ((j < scrsizey)); // End vertical loop
+
+		strcpy(filename, path);
+
+		if (frac)
+		{
+			snprintf(buffer, 20, "julia-%05d.ppm", maxIter);
+		}
+		else
+		{
+			snprintf(buffer, 20, "mandel-%05d.ppm", maxIter);
+		}
+
+		strcat(filename, buffer);
+		saveimg(img, resx, resy, filename);
+		printf("%s\n", filename);
+	}
 }
 
 int main(int argc, char **argv)
@@ -189,14 +210,27 @@ int main(int argc, char **argv)
 	Generate(0);
 	t2 = clock();
 	printf("Julia Fractal generated in %6.3f secs.\n", (((double)(t2 - t1)) / CLOCKS_PER_SEC));
+
+	int j = 0;
+	do // Start vertical loop
+	{
+		int i = 0;
+		do // Start horizontal loop
+		{
+			img[j * resx + i] = 0;
+			i++;
+		} while ((i < scrsizex)); // End horizontal loop
+		j++;
+	} while ((j < scrsizey)); // End vertical loop
+
 	//	mandel(img,resx,resy);
 	// Guarda a imagem no ficheiro
-	saveimg(img, resx, resy, "julia.pgm");
+	// saveimg(img, resx, resy, "julia.pgm");
 	t1 = clock();
 	Generate(1);
 	t2 = clock();
 	printf("Mandelbrot Fractal generated in %6.3f secs.\n", (((double)(t2 - t1)) / CLOCKS_PER_SEC));
 	//	mandel(img,resx,resy);
 	// Guarda a imagem no ficheiro
-	saveimg(img, resx, resy, "mandel.pgm");
+	// saveimg(img, resx, resy, "mandel.pgm");
 }
