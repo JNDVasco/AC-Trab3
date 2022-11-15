@@ -33,6 +33,10 @@ void putpixel(int x, int y, int color)
 	img[y * resx + x] = color * 1111;
 }
 
+struct timespec sum_timestamp(struct timespec begin, struct timespec end);
+
+double time_between_timestamp(struct timespec begin, struct timespec end);
+
 //	***************  JULIA FUNCTION ******************
 /*  First, the pixel must be converted to its actual plane value (x,y).
 	Then it is passed through the function the number of times in the
@@ -160,7 +164,7 @@ void saveimg(int *img, int rx, int ry, char *fname)
 
 int main(int argc, char **argv)
 {
-	clock_t t1, t2;
+	struct timespec t1, t2;
 	if (argc == 1)
 	{
 		resx = 640;
@@ -185,18 +189,42 @@ int main(int argc, char **argv)
 	scrsizey = resy;
 	pixcorx = (Maxx - Minx) / scrsizex;
 	pixcory = (Maxy - Miny) / scrsizey;
-	t1 = clock();
+
+	clock_gettime(CLOCK_REALTIME, &t1);
 	Generate(0);
-	t2 = clock();
-	printf("Mandelbrot Fractal generated in %6.3f secs.\n", (((double)(t2 - t1)) / CLOCKS_PER_SEC));
-	//	mandel(img,resx,resy);
-	// Guarda a imagem no ficheiro
-	saveimg(img, resx, resy, "julia.pgm");
-	t1 = clock();
-	Generate(1);
-	t2 = clock();
-	printf("Julia Fractal generated in %6.3f secs.\n", (((double)(t2 - t1)) / CLOCKS_PER_SEC));
-	//	mandel(img,resx,resy);
-	// Guarda a imagem no ficheiro
+	clock_gettime(CLOCK_REALTIME, &t2);
+	printf("Mandelbrot Fractal generated in %6.3f secs.\n", time_between_timestamp(t1, t2));
 	saveimg(img, resx, resy, "mandel.pgm");
+
+	clock_gettime(CLOCK_REALTIME, &t1);
+	Generate(1);
+	clock_gettime(CLOCK_REALTIME, &t2);
+	printf("Julia Fractal generated in %6.3f secs.\n", time_between_timestamp(t1, t2));
+	saveimg(img, resx, resy, "julia.pgm");
+}
+
+struct timespec sub_timestamp(struct timespec begin, struct timespec end)
+{
+	struct timespec result;
+
+	result.tv_sec = end.tv_sec - begin.tv_sec;
+	result.tv_nsec = end.tv_nsec - begin.tv_nsec;
+
+	if (result.tv_nsec < 0)
+	{
+		result.tv_sec -= 1;
+		result.tv_nsec += 1e9;
+	}
+
+	return result;
+}
+
+// Returns time in milliseconds
+double time_between_timestamp(struct timespec begin, struct timespec end)
+{
+	struct timespec calc;
+	calc = sub_timestamp(begin, end);
+	double result = (calc.tv_sec) + (calc.tv_nsec) / 1e9;
+
+	return result;
 }
