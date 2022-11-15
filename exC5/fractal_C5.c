@@ -219,6 +219,8 @@ int main(int argc, char **argv)
 	clock_gettime(CLOCK_REALTIME, &t2);
 	printf("Julia Fractal generated in %6.3f secs.\n", time_between_timestamp(t1, t2));
 	saveimg(img, resx, resy, "julia.pgm");
+
+	free(img);
 }
 
 // Returns time in seconds

@@ -228,4 +228,6 @@ int main(int argc, char **argv)
 	Generate(1);
 	t2 = clock();
 	printf("Julia Fractal generated in %6.3f secs.\n", (((double)(t2 - t1)) / CLOCKS_PER_SEC));
+
+	free(img);
 }
