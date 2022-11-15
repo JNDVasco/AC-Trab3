@@ -7,6 +7,14 @@
 #include <fcntl.h>
 #include <math.h>
 #include <stdio.h>
+
+#ifdef _OPENMP
+#include <omp.h>
+#else
+#define omp_get_num_threads() 0
+#define omp_get_thread_num() 0
+#endif
+
 //  These are the global variables.  That means they can be changed from
 //  any of my functions.  This is usfull for my options function.  That
 //  means that these variables are 'user' variables and can be changed
@@ -111,14 +119,20 @@ void mandel(int xpt, int ypt)
 
 void Generate(int frac)
 {
-
-	int j = 0;
-	do // Start vertical loop
+	int thread_id, nloops, j = 0, i = 0;
+	nloops = 0;
+	thread_id = omp_get_thread_num();
+#pragma omp for
+	for (int j = 0; j < scrsizey; j++)
 	{
-		int i = 0;
-		do // Start horizontal loop
-		{
+		if (nloops == 0)
+			printf(" Thread %d started with i=%d\n", thread_id, j);
+		++nloops;
+		// Start vertical loop
 
+		for (int i = 0; i < scrsizex; i++)
+		{
+			// Start horizontal loop
 			if (frac)
 			{
 				julia(i, j);
@@ -127,11 +141,10 @@ void Generate(int frac)
 			{
 				mandel(i, j);
 			}
-
-			i++;
-		} while ((i < scrsizex)); // End horizontal loop
-		j++;
-	} while ((j < scrsizey)); // End vertical loop
+			// End horizontal loop
+		}
+		// End vertical loop
+	}
 }
 
 void saveimg(int *img, int rx, int ry, char *fname)

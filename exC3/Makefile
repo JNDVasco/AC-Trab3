@@ -1,4 +1,4 @@
 
-fractal: fractal.c
-	gcc fractal.c -o fractal
-	./fractal 1024 768
+fractal: fractal_C3.c
+	gcc -fopenmp fractal_C3.c -o fractal_C3
+	./fractal_C3 1024 768
