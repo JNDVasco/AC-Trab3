@@ -1,4 +1,4 @@
 
-fractal: fractal.c
-	gcc fractal.c -o fractal
-	./fractal 1024 768
+fractal_C1: fractal_C1.c
+	gcc fractal_C1.c -o fractal_C1
+	./fractal 3840 2160

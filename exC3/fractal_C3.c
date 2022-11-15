@@ -1,3 +1,8 @@
+#ifdef _OPENMP
+#include <omp.h>
+#else
+#define omp_get_thread_num() 0
+#endif
 
 #include <time.h>
 #include <stdlib.h>
@@ -7,13 +12,6 @@
 #include <fcntl.h>
 #include <math.h>
 #include <stdio.h>
-
-#ifdef _OPENMP
-#include <omp.h>
-#else
-#define omp_get_num_threads() 0
-#define omp_get_thread_num() 0
-#endif
 
 //  These are the global variables.  That means they can be changed from
 //  any of my functions.  This is usfull for my options function.  That
@@ -120,30 +118,33 @@ void mandel(int xpt, int ypt)
 void Generate(int frac)
 {
 	int thread_id, nloops, j = 0, i = 0;
-	nloops = 0;
-	thread_id = omp_get_thread_num();
-#pragma omp for
-	for (int j = 0; j < scrsizey; j++)
+#pragma omp parallel private(thread_id, nloops)
 	{
-		if (nloops == 0)
-			printf(" Thread %d started with i=%d\n", thread_id, j);
-		++nloops;
-		// Start vertical loop
-
-		for (int i = 0; i < scrsizex; i++)
+		nloops = 0;
+		thread_id = omp_get_thread_num();
+#pragma omp for
+		for (int j = 0; j < scrsizey; j++)
 		{
-			// Start horizontal loop
-			if (frac)
+			if (nloops == 0)
+				printf(" Thread %d started with j=%d\n", thread_id, j);
+			++nloops;
+			// Start vertical loop
+
+			for (int i = 0; i < scrsizex; i++)
 			{
-				julia(i, j);
+				// Start horizontal loop
+				if (frac)
+				{
+					julia(i, j);
+				}
+				else
+				{
+					mandel(i, j);
+				}
+				// End horizontal loop
 			}
-			else
-			{
-				mandel(i, j);
-			}
-			// End horizontal loop
+			// End vertical loop
 		}
-		// End vertical loop
 	}
 }
 
