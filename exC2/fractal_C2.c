@@ -32,7 +32,7 @@ int resx;
 int resy;
 int *img;
 
-char path[10] = "./ex2/";
+char path[10] = "./images/";
 char filename[64];
 char buffer[20];
 
@@ -209,7 +209,7 @@ int main(int argc, char **argv)
 	t1 = clock();
 	Generate(0);
 	t2 = clock();
-	printf("Julia Fractal generated in %6.3f secs.\n", (((double)(t2 - t1)) / CLOCKS_PER_SEC));
+	printf("Mandelbrot Fractal generated in %6.3f secs.\n", (((double)(t2 - t1)) / CLOCKS_PER_SEC));
 
 	int j = 0;
 	do // Start vertical loop
@@ -229,7 +229,7 @@ int main(int argc, char **argv)
 	t1 = clock();
 	Generate(1);
 	t2 = clock();
-	printf("Mandelbrot Fractal generated in %6.3f secs.\n", (((double)(t2 - t1)) / CLOCKS_PER_SEC));
+	printf("Julia Fractal generated in %6.3f secs.\n", (((double)(t2 - t1)) / CLOCKS_PER_SEC));
 	//	mandel(img,resx,resy);
 	// Guarda a imagem no ficheiro
 	// saveimg(img, resx, resy, "mandel.pgm");

@@ -134,9 +134,8 @@ void Generate(int frac)
 			{
 				mandel(i, j);
 			}
-			concat
-			snprintf(filename, sizeof(filename), "%s%d.ppm", path, j);
-				saveimg(img, resx, resy, "julia.pgm");
+			printf(filename, sizeof(filename), "%s%d.ppm", path, j);
+			saveimg(img, resx, resy, "julia.pgm");
 			i++;
 		} while ((i < scrsizex)); // End horizontal loop
 		j++;
