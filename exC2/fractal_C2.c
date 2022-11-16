@@ -32,6 +32,25 @@ int resx;
 int resy;
 int *img;
 
+/*
+ img = [0,1,...,resx*resy-1]
+
+ img = [0,1,2,3,4,5,6,7,8]
+
+ i ->	
+ j	0 1 2
+||	3 4 5
+\/	6 7 8
+
+	i + j * 3
+
+	1 + 1 * 3 = 4
+
+ Pixel(i,j) = img[i + j*resx]
+
+
+*/
+
 char path[10] = "./images/";
 char filename[64];
 char buffer[20];

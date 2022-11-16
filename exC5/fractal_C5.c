@@ -214,6 +214,11 @@ int main(int argc, char **argv)
 	printf("Mandelbrot Fractal generated in %6.3f secs.\n", time_between_timestamp(t1, t2));
 	saveimg(img, resx, resy, "mandel.pgm");
 
+	// O img tem o fractal atual
+	// fazes uma copia com memcpy
+	// fazes a difusao, com a formula que tens no pdf
+	//
+
 	clock_gettime(CLOCK_REALTIME, &t1);
 	Generate(1);
 	clock_gettime(CLOCK_REALTIME, &t2);
@@ -236,3 +241,15 @@ double time_between_timestamp(struct timespec begin, struct timespec end)
 	}
 	return ((calc.tv_sec) + (calc.tv_nsec) / 1e9);
 }
+
+/*
+	int returnPixVal(i, j)
+		{
+			if (i < 0 || i >= resx || j < 0 || j >= resy)
+				return 0;
+			else
+				return img[i * resx + j];
+		}
+
+	media = (1 - al+ha) * returnPixVal(i, j) + alpha * (returnPixVal(i-1, j-1) + returnPixVal(i-1, j) + returnPixVal(i-1, j+1) + returnPixVal(i, j-1) + returnPixVal(i, j+1) + returnPixVal(i+1, j-1) + returnPixVal(i+1, j) + returnPixVal(i+1, j+1)) / 8;
+*/
