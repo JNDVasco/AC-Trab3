@@ -218,6 +218,10 @@ int main(int argc, char **argv)
 	// fazes uma copia com memcpy
 	// fazes a difusao, com a formula que tens no pdf
 	//
+	/*
+	img2 = (int *)malloc(resx * resy * sizeof(int));
+	memcpy(imgcpy, img, resx * resy * sizeof(int));
+	*/
 
 	clock_gettime(CLOCK_REALTIME, &t1);
 	Generate(1);
@@ -251,5 +255,9 @@ double time_between_timestamp(struct timespec begin, struct timespec end)
 				return img[i * resx + j];
 		}
 
-	media = (1 - al+ha) * returnPixVal(i, j) + alpha * (returnPixVal(i-1, j-1) + returnPixVal(i-1, j) + returnPixVal(i-1, j+1) + returnPixVal(i, j-1) + returnPixVal(i, j+1) + returnPixVal(i+1, j-1) + returnPixVal(i+1, j) + returnPixVal(i+1, j+1)) / 8;
+	for j ate resx
+		for i ate resy
+			img2[i + j * resx] = (1 - alpha) * returnPixVal(i, j) + alpha * (returnPixVal(i-1, j-1) + returnPixVal(i-1, j) + returnPixVal(i-1, j+1) + returnPixVal(i, j-1) + returnPixVal(i, j+1) + returnPixVal(i+1, j-1) + returnPixVal(i+1, j) + returnPixVal(i+1, j+1)) / 8;
+
+
 */
