@@ -256,6 +256,8 @@ int returnPixVal(int i, int j)
 void difusion()
 {
 	int thread_id, nloops, j = 0, i = 0, x = 0;
+	int currentPixel = 0;
+	int neighbourPixels = 0;
 	for (x = 0; x < difIter; x++)
 	{
 
@@ -273,15 +275,24 @@ void difusion()
 
 				for (j = 0; j < resx; j++)
 				{
-					img2[i * resx + j] = (int)((1 - alfa) * returnPixVal(i, j) + (alfa * 0.125 * (returnPixVal(i - 1, j - 1) + returnPixVal(i - 1, j) + returnPixVal(i - 1, j + 1) + returnPixVal(i, j - 1) + returnPixVal(i, j + 1) + returnPixVal(i + 1, j - 1) + returnPixVal(i + 1, j) + returnPixVal(i + 1, j + 1))));
-					printf("i:%d j:%d value:%d \n", i, j, img2[i * resx + j]);
+
+					currentPixel = ((1 - alfa) * returnPixVal(i, j));
+					neighbourPixels += returnPixVal(i - 1, j - 1) * 0.125;
+					neighbourPixels += returnPixVal(i - 1, j) * 0.125;
+					neighbourPixels += returnPixVal(i - 1, j + 1) * 0.125;
+					neighbourPixels += returnPixVal(i, j - 1) * 0.125;
+					neighbourPixels += returnPixVal(i, j + 1) * 0.125;
+					neighbourPixels += returnPixVal(i + 1, j - 1) * 0.125;
+					neighbourPixels += returnPixVal(i + 1, j) * 0.125;
+					neighbourPixels += returnPixVal(i + 1, j + 1) * 0.125;
+					neighbourPixels *= alfa;
+					img2[i * resx + j] = currentPixel + neighbourPixels;
 				}
 			}
 		}
-		printf("estou aqui\n");
 		strcpy(filename, path);
 
-		snprintf(buffer, 20, "difuson-%04d.ppm", x);
+		snprintf(buffer, 20, "diff-%04d.ppm", x);
 
 		strcat(filename, buffer);
 		printf("[INFO]  %s\n", filename);
