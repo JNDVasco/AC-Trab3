@@ -35,20 +35,84 @@ int scrsizey; // Vertical screen size
 
 int resx, resy, *img, difIter, *img2;
 float alfa;
+
+char path[10] = "./images/";
+char filename[64];
+char buffer[20];
+
+int returnPixVal(int i, int j);
+void difusion();
+void putpixel(int x, int y, int color);
+void julia(int xpt, int ypt);
+void mandel(int xpt, int ypt);
+void Generate(int frac);
+void saveimg(int *img, int rx, int ry, char *fname);
+struct timespec sum_timestamp(struct timespec begin, struct timespec end);
+double time_between_timestamp(struct timespec begin, struct timespec end);
+void difusion();
+
+// =========================================================================
+int main(int argc, char **argv)
+{
+	struct timespec t1, t2;
+	if (argc == 1)
+	{
+		resx = 3840;
+		resy = 2160;
+		difIter = 100;
+		alfa = 0.5;
+	}
+	else if (argc == 5)
+	{
+		resx = atoi(argv[1]);
+		resy = atoi(argv[2]);
+		difIter = atoi(argv[3]);
+		alfa = atof(argv[4]);
+	}
+	else
+	{
+		printf("Erro no número de argumentos\n");
+		printf("Se não usar argumentos a imagem de saida terá dimensões 640x480\n");
+		printf("Senão devera especificar o numero de colunas seguido do numero de linhas\n");
+		printf("Seguido do numero de iteracoes da difusão e constante de difusao (entre 0 e 1)\n");
+		printf("\nExemplo: %s 320 240 100 0.5\n", argv[0]);
+		exit(1);
+	}
+	printf("Resolução: %d x %d\n", resx, resy);
+	printf("Iterações da difusão: %d\n", difIter);
+	printf("Constante de difusão: %f\n", alfa);
+
+	img = (int *)malloc(resx * resy * sizeof(int));
+	scrsizex = resx;
+	scrsizey = resy;
+	pixcorx = (Maxx - Minx) / scrsizex;
+	pixcory = (Maxy - Miny) / scrsizey;
+
+	clock_gettime(CLOCK_REALTIME, &t1);
+	Generate(0);
+	clock_gettime(CLOCK_REALTIME, &t2);
+	printf("Mandelbrot Fractal generated in %6.3f secs.\n", time_between_timestamp(t1, t2));
+	saveimg(img, resx, resy, "mandel.pgm");
+
+	clock_gettime(CLOCK_REALTIME, &t1);
+	Generate(1);
+	clock_gettime(CLOCK_REALTIME, &t2);
+	printf("Julia Fractal generated in %6.3f secs.\n", time_between_timestamp(t1, t2));
+	saveimg(img, resx, resy, "julia.pgm");
+
+	img2 = (int *)malloc(resx * resy * sizeof(int));
+
+	difusion();
+
+	free(img);
+	free(img2);
+	return 0;
+}
+
 void putpixel(int x, int y, int color)
 {
 	img[y * resx + x] = color * 1111;
 }
-
-struct timespec sum_timestamp(struct timespec begin, struct timespec end);
-
-double time_between_timestamp(struct timespec begin, struct timespec end);
-
-int returnPixVal(int i, int j);
-void difusion();
-char path[10] = "./images/";
-char filename[64];
-char buffer[20];
 
 void julia(int xpt, int ypt)
 {
@@ -163,63 +227,6 @@ void saveimg(int *img, int rx, int ry, char *fname)
 	fclose(fp);
 }
 
-int main(int argc, char **argv)
-{
-	struct timespec t1, t2;
-	if (argc == 1)
-	{
-		resx = 3840;
-		resy = 2160;
-		difIter = 100;
-		alfa = 0.5;
-	}
-	else if (argc == 5)
-	{
-		resx = atoi(argv[1]);
-		resy = atoi(argv[2]);
-		difIter = atoi(argv[3]);
-		alfa = atof(argv[4]);
-	}
-	else
-	{
-		printf("Erro no número de argumentos\n");
-		printf("Se não usar argumentos a imagem de saida terá dimensões 640x480\n");
-		printf("Senão devera especificar o numero de colunas seguido do numero de linhas\n");
-		printf("Seguido do numero de iteracoes da difusão e constante de difusao (entre 0 e 1)\n");
-		printf("\nExemplo: %s 320 240 100 0.5\n", argv[0]);
-		exit(1);
-	}
-	printf("Resolução: %d x %d\n", resx, resy);
-	printf("Iterações da difusão: %d\n", difIter);
-	printf("Constante de difusão: %f\n", alfa);
-
-	img = (int *)malloc(resx * resy * sizeof(int));
-	scrsizex = resx;
-	scrsizey = resy;
-	pixcorx = (Maxx - Minx) / scrsizex;
-	pixcory = (Maxy - Miny) / scrsizey;
-
-	clock_gettime(CLOCK_REALTIME, &t1);
-	Generate(0);
-	clock_gettime(CLOCK_REALTIME, &t2);
-	printf("Mandelbrot Fractal generated in %6.3f secs.\n", time_between_timestamp(t1, t2));
-	saveimg(img, resx, resy, "mandel.pgm");
-
-	clock_gettime(CLOCK_REALTIME, &t1);
-	Generate(1);
-	clock_gettime(CLOCK_REALTIME, &t2);
-	printf("Julia Fractal generated in %6.3f secs.\n", time_between_timestamp(t1, t2));
-	saveimg(img, resx, resy, "julia.pgm");
-
-	img2 = (int *)malloc(resx * resy * sizeof(int));
-
-	difusion();
-
-	free(img);
-	free(img2);
-	return 0;
-}
-
 // Returns time in seconds
 double time_between_timestamp(struct timespec begin, struct timespec end)
 {
@@ -238,12 +245,10 @@ int returnPixVal(int i, int j)
 {
 	if (i < 0 || i >= resy || j < 0 || j >= resx)
 	{
-		// printf("i: %d j:%d fora dos lim \n", i, j);
 		return 0;
 	}
 	else
 	{
-		// printf(" i:%d j:%d value:%d \n", i, j, img[i * resx + j]);
 		return img[i * resx + j];
 	}
 }
@@ -268,8 +273,8 @@ void difusion()
 
 				for (j = 0; j < resx; j++)
 				{
-					img2[i * resx + j] = (1 - alfa) * returnPixVal(i, j) + alfa * (returnPixVal(i - 1, j - 1) + returnPixVal(i - 1, j) + returnPixVal(i - 1, j + 1) + returnPixVal(i, j - 1) + returnPixVal(i, j + 1) + returnPixVal(i + 1, j - 1) + returnPixVal(i + 1, j) + returnPixVal(i + 1, j + 1)) / 8;
-					printf("i:%d j:%d value:%d \n", i, j, img2[i + j * resx]);
+					img2[i * resx + j] = (int)((1 - alfa) * returnPixVal(i, j) + (alfa * 0.125 * (returnPixVal(i - 1, j - 1) + returnPixVal(i - 1, j) + returnPixVal(i - 1, j + 1) + returnPixVal(i, j - 1) + returnPixVal(i, j + 1) + returnPixVal(i + 1, j - 1) + returnPixVal(i + 1, j) + returnPixVal(i + 1, j + 1))));
+					printf("i:%d j:%d value:%d \n", i, j, img2[i * resx + j]);
 				}
 			}
 		}
