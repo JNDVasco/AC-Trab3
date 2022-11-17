@@ -12,6 +12,7 @@
 #include <fcntl.h>
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 
 //  These are the global variables.  That means they can be changed from
 //  any of my functions.  This is usfull for my options function.  That
@@ -32,8 +33,8 @@ float pixcory; // plane for both x and y axis'
 int scrsizex; // Horizontal screen size in pixels
 int scrsizey; // Vertical screen size
 
-int resx, resy, *img, alfa, difIter;
-
+int resx, resy, *img, difIter, *img2;
+float alfa;
 void putpixel(int x, int y, int color)
 {
 	img[y * resx + x] = color * 1111;
@@ -43,19 +44,11 @@ struct timespec sum_timestamp(struct timespec begin, struct timespec end);
 
 double time_between_timestamp(struct timespec begin, struct timespec end);
 
-//	***************  JULIA FUNCTION ******************
-/*  First, the pixel must be converted to its actual plane value (x,y).
-	Then it is passed through the function the number of times in the
-	gloabal variable inIter(ations).  If the break condition is reached,
-	which has been mathmaticaly determined so that if the value of Z is
-	larger than that, the function will continue for ever to infinity.
-	Depending on the number of times the function was inIterated before the
-	break value was reached, the color displayed on the screen changes. If
-	the break value is never reached, the point is considered to be part of
-	the set. The color for that is black (0).
-	For the julia set, the Z is the point under consideration.  The
-	constant can be changed by the user.
-*/
+int returnPixVal(int i, int j);
+void difusion();
+char path[10] = "./images/";
+char filename[64];
+char buffer[20];
 
 void julia(int xpt, int ypt)
 {
@@ -85,11 +78,6 @@ void julia(int xpt, int ypt)
 	else
 		putpixel(xpt, ypt, color);
 }
-
-//	*************  MANDELBROT FUNCTION ***************
-/*  The mandelbrot function is the same as the Julia function except
-	that the Z is 0 and the constant is the point under consideration.
-*/
 
 void mandel(int xpt, int ypt)
 {
@@ -190,7 +178,7 @@ int main(int argc, char **argv)
 		resx = atoi(argv[1]);
 		resy = atoi(argv[2]);
 		difIter = atoi(argv[3]);
-		alfa = atoi(argv[4]);
+		alfa = atof(argv[4]);
 	}
 	else
 	{
@@ -201,6 +189,9 @@ int main(int argc, char **argv)
 		printf("\nExemplo: %s 320 240 100 0.5\n", argv[0]);
 		exit(1);
 	}
+	printf("Resolução: %d x %d\n", resx, resy);
+	printf("Iterações da difusão: %d\n", difIter);
+	printf("Constante de difusão: %f\n", alfa);
 
 	img = (int *)malloc(resx * resy * sizeof(int));
 	scrsizex = resx;
@@ -214,22 +205,19 @@ int main(int argc, char **argv)
 	printf("Mandelbrot Fractal generated in %6.3f secs.\n", time_between_timestamp(t1, t2));
 	saveimg(img, resx, resy, "mandel.pgm");
 
-	// O img tem o fractal atual
-	// fazes uma copia com memcpy
-	// fazes a difusao, com a formula que tens no pdf
-	//
-	/*
-	img2 = (int *)malloc(resx * resy * sizeof(int));
-	memcpy(imgcpy, img, resx * resy * sizeof(int));
-	*/
-
 	clock_gettime(CLOCK_REALTIME, &t1);
 	Generate(1);
 	clock_gettime(CLOCK_REALTIME, &t2);
 	printf("Julia Fractal generated in %6.3f secs.\n", time_between_timestamp(t1, t2));
 	saveimg(img, resx, resy, "julia.pgm");
 
+	img2 = (int *)malloc(resx * resy * sizeof(int));
+
+	difusion();
+
 	free(img);
+	free(img2);
+	return 0;
 }
 
 // Returns time in seconds
@@ -246,18 +234,55 @@ double time_between_timestamp(struct timespec begin, struct timespec end)
 	return ((calc.tv_sec) + (calc.tv_nsec) / 1e9);
 }
 
-/*
-	int returnPixVal(i, j)
+int returnPixVal(int i, int j)
+{
+	if (i < 0 || i >= resy || j < 0 || j >= resx)
+	{
+		// printf("i: %d j:%d fora dos lim \n", i, j);
+		return 0;
+	}
+	else
+	{
+		// printf(" i:%d j:%d value:%d \n", i, j, img[i * resx + j]);
+		return img[i * resx + j];
+	}
+}
+
+void difusion()
+{
+	int thread_id, nloops, j = 0, i = 0, x = 0;
+	for (x = 0; x < difIter; x++)
+	{
+
+#pragma omp parallel private(thread_id, nloops)
 		{
-			if (i < 0 || i >= resx || j < 0 || j >= resy)
-				return 0;
-			else
-				return img[i * resx + j];
+			nloops = 0;
+			thread_id = omp_get_thread_num();
+#pragma omp for
+
+			for (i = 0; i < resy; i++)
+			{
+				if (nloops == 0)
+					printf(" Thread %d started with j=%d\n", thread_id, j);
+				++nloops;
+
+				for (j = 0; j < resx; j++)
+				{
+					img2[i * resx + j] = (1 - alfa) * returnPixVal(i, j) + alfa * (returnPixVal(i - 1, j - 1) + returnPixVal(i - 1, j) + returnPixVal(i - 1, j + 1) + returnPixVal(i, j - 1) + returnPixVal(i, j + 1) + returnPixVal(i + 1, j - 1) + returnPixVal(i + 1, j) + returnPixVal(i + 1, j + 1)) / 8;
+					printf("i:%d j:%d value:%d \n", i, j, img2[i + j * resx]);
+				}
+			}
 		}
+		printf("estou aqui\n");
+		strcpy(filename, path);
 
-	for j ate resx
-		for i ate resy
-			img2[i + j * resx] = (1 - alpha) * returnPixVal(i, j) + alpha * (returnPixVal(i-1, j-1) + returnPixVal(i-1, j) + returnPixVal(i-1, j+1) + returnPixVal(i, j-1) + returnPixVal(i, j+1) + returnPixVal(i+1, j-1) + returnPixVal(i+1, j) + returnPixVal(i+1, j+1)) / 8;
+		snprintf(buffer, 20, "difuson-%04d.ppm", x);
 
+		strcat(filename, buffer);
+		printf("[INFO]  %s\n", filename);
+		saveimg(img2, resx, resy, filename);
 
-*/
+		memcpy(img, img2, resx * resy * sizeof(int));
+	}
+	return;
+}
