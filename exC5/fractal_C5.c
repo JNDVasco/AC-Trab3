@@ -38,7 +38,7 @@ float alfa;
 
 char path[10] = "./images/";
 char filename[64];
-char buffer[20];
+char buffer[27];
 
 int returnPixVal(int i, int j);
 void difusion();
@@ -49,7 +49,7 @@ void Generate(int frac);
 void saveimg(int *img, int rx, int ry, char *fname);
 struct timespec sum_timestamp(struct timespec begin, struct timespec end);
 double time_between_timestamp(struct timespec begin, struct timespec end);
-void difusion();
+void difusion(int select);
 
 // =========================================================================
 int main(int argc, char **argv)
@@ -83,6 +83,7 @@ int main(int argc, char **argv)
 	printf("Constante de difusão: %f\n", alfa);
 
 	img = (int *)malloc(resx * resy * sizeof(int));
+	img2 = (int *)malloc(resx * resy * sizeof(int));
 	scrsizex = resx;
 	scrsizey = resy;
 	pixcorx = (Maxx - Minx) / scrsizex;
@@ -93,16 +94,14 @@ int main(int argc, char **argv)
 	clock_gettime(CLOCK_REALTIME, &t2);
 	printf("Mandelbrot Fractal generated in %6.3f secs.\n", time_between_timestamp(t1, t2));
 	saveimg(img, resx, resy, "mandel.pgm");
+	difusion(0);
 
 	clock_gettime(CLOCK_REALTIME, &t1);
 	Generate(1);
 	clock_gettime(CLOCK_REALTIME, &t2);
 	printf("Julia Fractal generated in %6.3f secs.\n", time_between_timestamp(t1, t2));
 	saveimg(img, resx, resy, "julia.pgm");
-
-	img2 = (int *)malloc(resx * resy * sizeof(int));
-
-	difusion();
+	difusion(1);
 
 	free(img);
 	free(img2);
@@ -253,7 +252,7 @@ int returnPixVal(int i, int j)
 	}
 }
 
-void difusion()
+void difusion(int select)
 {
 	int thread_id, nloops, j = 0, i = 0, x = 0;
 	int currentPixel = 0;
@@ -292,7 +291,10 @@ void difusion()
 		}
 		strcpy(filename, path);
 
-		snprintf(buffer, 20, "diff-%04d.ppm", x);
+		if (select)
+			snprintf(buffer, 26, "Julia_diff-%04d.ppm", x);
+		else
+			snprintf(buffer, 27, "Mandel_diff-%04d.ppm", x);
 
 		strcat(filename, buffer);
 		printf("[INFO]  %s\n", filename);
