@@ -242,7 +242,7 @@ void difusion(int select)
 				{
 					// imgAux[i * resx + j] = 0;
 					neighbourPixels = 0;
-					
+
 					currentPixel = ((1 - alfa) * returnPixVal(i, j));
 					neighbourPixels += returnPixVal(i - 1, j - 1);
 					neighbourPixels += returnPixVal(i - 1, j);
