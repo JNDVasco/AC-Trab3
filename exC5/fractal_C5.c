@@ -33,12 +33,12 @@ float pixcory; // plane for both x and y axis'
 int scrsizex; // Horizontal screen size in pixels
 int scrsizey; // Vertical screen size
 
-int resx, resy, *img, difIter, *img2;
+int resx, resy, *img, difIter, *imgAux;
 float alfa;
 
 char path[10] = "./images/";
 char filename[64];
-char buffer[27];
+char buffer[30];
 
 int returnPixVal(int i, int j);
 void difusion();
@@ -47,14 +47,11 @@ void julia(int xpt, int ypt);
 void mandel(int xpt, int ypt);
 void Generate(int frac);
 void saveimg(int *img, int rx, int ry, char *fname);
-struct timespec sum_timestamp(struct timespec begin, struct timespec end);
-double time_between_timestamp(struct timespec begin, struct timespec end);
 void difusion(int select);
 
 // =========================================================================
 int main(int argc, char **argv)
 {
-	struct timespec t1, t2;
 	if (argc == 1)
 	{
 		resx = 3840;
@@ -83,28 +80,24 @@ int main(int argc, char **argv)
 	printf("Constante de difusão: %f\n", alfa);
 
 	img = (int *)malloc(resx * resy * sizeof(int));
-	img2 = (int *)malloc(resx * resy * sizeof(int));
+	imgAux = (int *)malloc(resx * resy * sizeof(int));
 	scrsizex = resx;
 	scrsizey = resy;
 	pixcorx = (Maxx - Minx) / scrsizex;
 	pixcory = (Maxy - Miny) / scrsizey;
 
-	clock_gettime(CLOCK_REALTIME, &t1);
 	Generate(0);
-	clock_gettime(CLOCK_REALTIME, &t2);
-	printf("Mandelbrot Fractal generated in %6.3f secs.\n", time_between_timestamp(t1, t2));
+	printf("Mandelbrot Fractal generated.\n");
 	saveimg(img, resx, resy, "mandel.pgm");
 	difusion(0);
 
-	clock_gettime(CLOCK_REALTIME, &t1);
 	Generate(1);
-	clock_gettime(CLOCK_REALTIME, &t2);
-	printf("Julia Fractal generated in %6.3f secs.\n", time_between_timestamp(t1, t2));
+	printf("Julia Fractal generated.\n");
 	saveimg(img, resx, resy, "julia.pgm");
 	difusion(1);
 
 	free(img);
-	free(img2);
+	free(imgAux);
 	return 0;
 }
 
@@ -172,18 +165,12 @@ void mandel(int xpt, int ypt)
 
 void Generate(int frac)
 {
-	int thread_id, nloops, j = 0, i = 0;
-#pragma omp parallel private(thread_id, nloops)
+	int j = 0, i = 0;
+#pragma omp parallel
 	{
-		nloops = 0;
-		thread_id = omp_get_thread_num();
 #pragma omp for
 		for (int j = 0; j < scrsizey; j++)
 		{
-			if (nloops == 0)
-				printf(" Thread %d started with j=%d\n", thread_id, j);
-			++nloops;
-
 			for (int i = 0; i < scrsizex; i++)
 			{
 				// Start horizontal loop
@@ -226,20 +213,6 @@ void saveimg(int *img, int rx, int ry, char *fname)
 	fclose(fp);
 }
 
-// Returns time in seconds
-double time_between_timestamp(struct timespec begin, struct timespec end)
-{
-	struct timespec calc;
-	calc.tv_sec = end.tv_sec - begin.tv_sec;
-	calc.tv_nsec = end.tv_nsec - begin.tv_nsec;
-	if (calc.tv_nsec < 0)
-	{
-		calc.tv_sec -= 1;
-		calc.tv_nsec += 1e9;
-	}
-	return ((calc.tv_sec) + (calc.tv_nsec) / 1e9);
-}
-
 int returnPixVal(int i, int j)
 {
 	if (i < 0 || i >= resy || j < 0 || j >= resx)
@@ -254,41 +227,44 @@ int returnPixVal(int i, int j)
 
 void difusion(int select)
 {
-	int thread_id, nloops, j = 0, i = 0, x = 0;
+	int j = 0, i = 0, x = 0;
 	int currentPixel = 0;
 	int neighbourPixels = 0;
+	int thread_id, nloops;
+
 	for (x = 0; x < difIter; x++)
 	{
-
-#pragma omp parallel private(thread_id, nloops)
+#pragma omp parallel private(j, i, currentPixel, neighbourPixels, thread_id, nloops)
 		{
-			nloops = 0;
-			thread_id = omp_get_thread_num();
+			// nloops = 0;
+			// thread_id = omp_get_thread_num();
 #pragma omp for
-
 			for (i = 0; i < resy; i++)
 			{
-				if (nloops == 0)
-					printf(" Thread %d started with j=%d\n", thread_id, j);
-				++nloops;
-
 				for (j = 0; j < resx; j++)
 				{
+					// if (nloops == 0)
+					// {
+					// 	printf(" Thread %d started with i=%d and j=%d\n", thread_id, i, j);
+					// 	++nloops;
+					// }
 
 					currentPixel = ((1 - alfa) * returnPixVal(i, j));
-					neighbourPixels += returnPixVal(i - 1, j - 1) * 0.125;
-					neighbourPixels += returnPixVal(i - 1, j) * 0.125;
-					neighbourPixels += returnPixVal(i - 1, j + 1) * 0.125;
-					neighbourPixels += returnPixVal(i, j - 1) * 0.125;
-					neighbourPixels += returnPixVal(i, j + 1) * 0.125;
-					neighbourPixels += returnPixVal(i + 1, j - 1) * 0.125;
-					neighbourPixels += returnPixVal(i + 1, j) * 0.125;
-					neighbourPixels += returnPixVal(i + 1, j + 1) * 0.125;
-					neighbourPixels *= alfa;
-					img2[i * resx + j] = currentPixel + neighbourPixels;
+					neighbourPixels += returnPixVal(i - 1, j - 1);
+					neighbourPixels += returnPixVal(i - 1, j);
+					neighbourPixels += returnPixVal(i - 1, j + 1);
+					neighbourPixels += returnPixVal(i, j - 1);
+					neighbourPixels += returnPixVal(i, j + 1);
+					neighbourPixels += returnPixVal(i + 1, j - 1);
+					neighbourPixels += returnPixVal(i + 1, j);
+					neighbourPixels += returnPixVal(i + 1, j + 1);
+					neighbourPixels *= (alfa * 0.125);
+					imgAux[i * resx + j] = currentPixel + neighbourPixels;
 				}
 			}
+			// printf(" Thread %d ended with i=%d and j=%d\n", thread_id, i, j);
 		}
+
 		strcpy(filename, path);
 
 		if (select)
@@ -298,9 +274,8 @@ void difusion(int select)
 
 		strcat(filename, buffer);
 		printf("[INFO]  %s\n", filename);
-		saveimg(img2, resx, resy, filename);
+		saveimg(imgAux, resx, resy, filename);
 
-		memcpy(img, img2, resx * resy * sizeof(int));
+		memcpy(img, imgAux, resx * resy * sizeof(int));
 	}
-	return;
 }
