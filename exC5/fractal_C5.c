@@ -230,25 +230,16 @@ void difusion(int select)
 	int j = 0, i = 0, x = 0;
 	int currentPixel = 0;
 	int neighbourPixels = 0;
-	int thread_id, nloops;
 
 	for (x = 0; x < difIter; x++)
 	{
-#pragma omp parallel private(j, i, currentPixel, neighbourPixels, thread_id, nloops)
+#pragma omp parallel private(j, i, currentPixel, neighbourPixels)
 		{
-			// nloops = 0;
-			// thread_id = omp_get_thread_num();
 #pragma omp for
 			for (i = 0; i < resy; i++)
 			{
 				for (j = 0; j < resx; j++)
 				{
-					// if (nloops == 0)
-					// {
-					// 	printf(" Thread %d started with i=%d and j=%d\n", thread_id, i, j);
-					// 	++nloops;
-					// }
-
 					currentPixel = ((1 - alfa) * returnPixVal(i, j));
 					neighbourPixels += returnPixVal(i - 1, j - 1);
 					neighbourPixels += returnPixVal(i - 1, j);
@@ -262,7 +253,6 @@ void difusion(int select)
 					imgAux[i * resx + j] = currentPixel + neighbourPixels;
 				}
 			}
-			// printf(" Thread %d ended with i=%d and j=%d\n", thread_id, i, j);
 		}
 
 		strcpy(filename, path);
